@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  PRODUCT_SVC: "http://product-service:8082"
+  INVENTORY_SVC: "http://inventory-service:8083"
+  ORDER_SVC: "http://order-service:8084"
+  PAYMENT_SVC: "http://payment-service:8085"

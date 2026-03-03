@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service-deployment
+  labels:
+    app: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          imagePullPolicy: IfNotPresent
+          image: order-service
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: keycloak-config
+            - configMapRef:
+                name: order-service-config

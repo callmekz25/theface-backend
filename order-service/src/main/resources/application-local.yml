@@ -1,0 +1,16 @@
+KC_CLIENT_ID: test-microservices
+KC_ISSUE_URL: https://usw2.auth.ac/auth/realms/microservices-kz
+KC_SECRET: QGtmHMZ1Vgai49ztBuZ6rHrrDdgGPNMz
+KAFKA_HOST: kafka-service:9092
+POSTGRES_HOST: order-db-service:5432
+POSTGRES_DB: order_db
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: postgres
+KAFKA_RESERVED_INVENTORY_COMMAND_TOPIC: inventory.reserve.command
+KAFKA_CREATE_PAYMENT_COMMAND_TOPIC: payment.create.command
+KAFKA_PAYMENT_COMPLETED_TOPIC: payment.completed
+KAFKA_PAYMENT_FAILED_TOPIC: payment.failed
+KAFKA_INVENTORY_RESERVED_TOPIC: inventory.reserved
+KAFKA_INVENTORY_REJECTED_TOPIC: inventory.rejected
+KAFKA_INVENTORY_RELEASED_TOPIC: inventory.released
+PRODUCT_SVC: http://product-service:8082

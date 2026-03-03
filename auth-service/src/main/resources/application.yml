@@ -1,0 +1,29 @@
+server:
+  port: 8081
+
+jwt:
+  secret: cDQgcWIx2cd6Dnj1Za0FmPNFOB5dmW1A
+  internalSecret: 9GSHO1glgDuEOAQrMps44LitSeaVNmMI40bl7Sxra30zZ2nXylPrzsbfgTVftLXE
+  access-token-expiration: 900000      # 15 min
+  refresh-token-expiration: 2592000000  # 30 days
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:authuserdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

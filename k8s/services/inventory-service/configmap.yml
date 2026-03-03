@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-service-config
+data:
+  POSTGRES_HOST: "inventory-db-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "inventory_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  KAFKA_CREATE_INVENTORY_COMMAND_TOPIC: "create.inventory.command"
+  KAFKA_INVENTORY_RESERVED_TOPIC: "inventory.reserved"
+  KAFKA_INVENTORY_RELEASED_TOPIC: "inventory.released"
+  KAFKA_RESERVED_INVENTORY_COMMAND_TOPIC: "inventory.reserve.command"
+  KAFKA_INVENTORY_REJECTED_TOPIC: "inventory.rejected"

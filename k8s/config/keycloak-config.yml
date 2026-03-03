@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+data:
+  KC_CLIENT_ID: "test-microservices"
+  KC_ISSUE_URL: "https://usw2.auth.ac/auth/realms/microservices-kz"
+  KC_SECRET: "QGtmHMZ1Vgai49ztBuZ6rHrrDdgGPNMz"

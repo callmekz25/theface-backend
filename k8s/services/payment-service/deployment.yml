@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service-deployment
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          imagePullPolicy: IfNotPresent
+          image: payment-service
+          ports:
+            - containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: keycloak-config
+            - configMapRef:
+                name: payment-service-config

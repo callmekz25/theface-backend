@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+data:
+  POSTGRES_HOST: "order-db-service:5432"
+  POSTGRES_DB: "order_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  KAFKA_RESERVED_INVENTORY_COMMAND_TOPIC: "inventory.reserve.command"
+  KAFKA_CREATE_PAYMENT_COMMAND_TOPIC: "payment.create.command"
+  KAFKA_PAYMENT_COMPLETED_TOPIC: "payment.completed"
+  KAFKA_PAYMENT_FAILED_TOPIC: "payment.failed"
+  KAFKA_INVENTORY_RESERVED_TOPIC: "inventory.reserved"
+  KAFKA_INVENTORY_REJECTED_TOPIC: "inventory.rejected"
+  KAFKA_INVENTORY_RELEASED_TOPIC: "inventory.released"
+  PRODUCT_SVC: "http://product-service:8082"

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service-deployment
+  labels:
+    app: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          imagePullPolicy: IfNotPresent
+          image: product-service
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: keycloak-config
+            - configMapRef:
+                name: product-service-config

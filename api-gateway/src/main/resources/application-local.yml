@@ -1,0 +1,8 @@
+KC_CLIENT_ID: test-microservices
+KC_ISSUE_URL: https://usw2.auth.ac/auth/realms/microservices-kz
+KC_SECRET: QGtmHMZ1Vgai49ztBuZ6rHrrDdgGPNMz
+KAFKA_HOST: kafka-service:9092
+PRODUCT_SVC: http://product-service:8082
+INVENTORY_SVC: http://inventory-service:8083
+ORDER_SVC: http://order-service:8084
+PAYMENT_SVC: http://payment-service:8085
