@@ -7,6 +7,7 @@ public interface BaseService<Req, Res, ID> {
     List<Res> getAll();
     Res getById(ID id);
     Res create(Req request);
+    List<Res> createList(List<Req> request);
     Res update(ID id, Req request);
     void delete(ID id);
 }

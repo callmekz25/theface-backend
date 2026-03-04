@@ -2,10 +2,12 @@ package com.codewithkz.productservice.model;
 
 import com.codewithkz.commonlibrary.model.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,7 +20,7 @@ public class Variant extends BaseEntity {
     private Long price;
     @Column(name = "is_active")
     private boolean isActive;
-    @OneToMany
+    @OneToMany(mappedBy = "variant")
     private List<ProductImages> images;
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
@@ -28,5 +30,6 @@ public class Variant extends BaseEntity {
             joinColumns = @JoinColumn(name = "variant_id"),
             inverseJoinColumns = @JoinColumn(name = "attribute_value_id")
     )
-    private List<AttributeValue> attributeValues;
+    @Builder.Default
+    private List<AttributeValue> attributeValues = new ArrayList<>();
 }

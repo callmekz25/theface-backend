@@ -20,6 +20,6 @@ public class Brand extends BaseEntity {
     private String name;
     private String slug;
     private String thumbnail;
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "brand")
     private List<Product> products;
 }

@@ -1,20 +1,14 @@
 package com.codewithkz.productservice.dto.attribute;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class AttributeDTO extends BaseDTO {
+public class AttributeCreateUpdateRequestDTO extends BaseDTO {
     private String name;
-    private String value;
 }

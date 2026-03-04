@@ -1,8 +1,11 @@
 package com.codewithkz.productservice.dto.product;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
+import com.codewithkz.productservice.dto.variant.VariantDTO;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -10,7 +13,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class ProductCreateUpdateResponseDTO extends BaseDTO {
-    private String name;
-    private int price;
-    private int quantity;
+    private String title;
+    private String slug;
+    private String description;
+    private String origin;
+    private List<VariantDTO> variants;
 }

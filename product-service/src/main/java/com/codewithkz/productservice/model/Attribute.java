@@ -2,10 +2,12 @@ package com.codewithkz.productservice.model;
 
 import com.codewithkz.commonlibrary.model.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,15 +17,11 @@ import java.util.List;
 @NoArgsConstructor
 public class Attribute extends BaseEntity {
     private String name;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "product_attributes",
-            joinColumns = @JoinColumn(name = "attribute_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private List<Product> products;
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<AttributeValue> attributeValues;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "attribute")
+    @Builder.Default
+    private List<AttributeValue> attributeValues = new ArrayList<>();
 }
 
 /*
@@ -32,26 +30,27 @@ id
 p1
 
 A
-id    name
-a1    color
+id    name      p_id
+a1    color     p1
+a2    size      p1
 
 A_V
 id    value   a_id
 av1   red     a1
 av2   blue    a1
+av3   small   a2
+av4   medium  a2
 
-
-P_A
-id     p_id    a_id
-pa1     p1      a1
 
 V
 id     price   p_id
 v1     100     p1
 v2     120     p1
+v3     150     p1
+v4     160     p1
 
 V_A_V
-id    v_id    a_id
-va1   v1      a1
-va2   v2      a1
+id    v_id    a_v_id
+va1   v1      av1
+va2   v1      av2
  */

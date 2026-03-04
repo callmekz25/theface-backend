@@ -25,6 +25,4 @@ public class Collection extends BaseEntity {
     private boolean isShowHomePage;
     @Column(name = "is_filter")
     private boolean isFilter;
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Product> products;
 }

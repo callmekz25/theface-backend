@@ -7,14 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class AttributeDTO extends BaseDTO {
+public class AttributeCreateUpdateResponseDTO extends BaseDTO {
     private String name;
-    private String value;
 }

@@ -1,3 +1,4 @@
+
 server:
   port: 8082
 
@@ -7,6 +8,8 @@ app:
       create-inventory-command: ${KAFKA_CREATE_INVENTORY_COMMAND_TOPIC}
 
 spring:
+  application:
+    name: product-service
   security:
     oauth2:
       resourceserver:
