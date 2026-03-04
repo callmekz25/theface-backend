@@ -1,6 +1,11 @@
 package com.codewithkz.commonlibrary.controller;
 
+import com.codewithkz.commonlibrary.dto.BaseDTO;
+import com.codewithkz.commonlibrary.mapper.BaseMapper;
+import com.codewithkz.commonlibrary.model.BaseEntity;
 import com.codewithkz.commonlibrary.service.BaseService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,35 +13,40 @@ import org.springframework.web.bind.annotation.*;
 import java.io.Serializable;
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class BaseController<E extends BaseEntity, Req extends BaseDTO, Res extends BaseDTO, S, ID> {
 
-public abstract class BaseController<Req, Res, ID extends Serializable> {
+    protected BaseService<E, S, ID> service;
+    protected BaseMapper<E, Req, Res> mapper;
 
-    protected BaseService<Req, Res, ID> service;
-
-    protected BaseController(BaseService<Req, Res, ID> service) {
-        this.service = service;
-    }
 
     @GetMapping
     public ResponseEntity<List<Res>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+        List<E> result = service.getAll();
+        return ResponseEntity.ok(mapper.toDTOList(result));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Res> getById(@PathVariable ID id) {
-        return ResponseEntity.ok(service.getById(id));
+        E entity = service.getById(id);
+        return ResponseEntity.ok(mapper.toDTO(entity));
     }
 
     @PostMapping
     public ResponseEntity<Res> create(@RequestBody Req req) {
+        E entity = mapper.toEntity(req);
+        E created = service.create(entity);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.create(req));
+                .body(mapper.toDTO(created));
     }
 
     @PutMapping
     public ResponseEntity<Res> update(@PathVariable ID id,
                                       @RequestBody Req req) {
-        return ResponseEntity.ok(service.update(id, req));
+        E entity = mapper.toEntity(req);
+        E updated = service.update(id, entity);
+        return ResponseEntity.ok(mapper.toDTO(updated));
     }
 
     @DeleteMapping
