@@ -2,27 +2,13 @@ package com.codewithkz.productservice.service.impl;
 
 import com.codewithkz.commonlibrary.exception.NotFoundException;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
-import com.codewithkz.productservice.dto.attribute.AttributeCreateUpdateRequestDTO;
-import com.codewithkz.productservice.dto.attributevalue.AttributeValueCreateUpdateRequestDTO;
 import com.codewithkz.productservice.dto.product.ProductCreateUpdateRequestDTO;
-import com.codewithkz.productservice.dto.product.ProductCreateUpdateResponseDTO;
-import com.codewithkz.productservice.dto.variant.VariantCreateUpdateRequestDTO;
-import com.codewithkz.productservice.mapper.AttributeMapper;
-import com.codewithkz.productservice.mapper.AttributeValueMapper;
 import com.codewithkz.productservice.mapper.ProductMapper;
-import com.codewithkz.productservice.mapper.VariantMapper;
-import com.codewithkz.productservice.model.Attribute;
-import com.codewithkz.productservice.model.AttributeValue;
 import com.codewithkz.productservice.model.Product;
+import com.codewithkz.productservice.model.ProductImage;
 import com.codewithkz.productservice.model.Variant;
-import com.codewithkz.productservice.repository.AttributeRepository;
-import com.codewithkz.productservice.repository.AttributeValueRepository;
 import com.codewithkz.productservice.repository.ProductRepository;
-import com.codewithkz.productservice.repository.VariantRepository;
-import com.codewithkz.productservice.service.AttributeService;
-import com.codewithkz.productservice.service.AttributeValueService;
-import com.codewithkz.productservice.service.ProductService;
-import com.codewithkz.productservice.service.VariantService;
+import com.codewithkz.productservice.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,19 +21,64 @@ import java.util.Map;
 @Service
 public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUpdateRequestDTO, String> implements ProductService {
     private final ProductRepository repo;
-    private VariantService variantService;
+    private final VariantService variantService;
+    private final ProductImageService productImageService;
     private final ProductMapper mapper;
 
-    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, VariantService variantService, AttributeService attributeService, AttributeValueService attributeValueService) {
+    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, VariantService variantService, ProductImageService productImageService) {
         super(repo);
         this.repo = repo;
         this.mapper = mapper;
         this.variantService = variantService;
+        this.productImageService = productImageService;
     }
 
     @Override
     public List<Product> getAll() {
-        var products = repo.findAllVariants();
+        var products = repo.findAll();
+        List<String> productIds = new ArrayList<>();
+        List<String> variantIds = new ArrayList<>();
+        for (Product product : products) {
+            productIds.add(product.getId());
+        }
+        List<Variant> variants = variantService.getByProductIds(productIds);
+        for (Variant variant : variants) {
+            variantIds.add(variant.getId());
+        }
+        List<ProductImage> images = productImageService.getByVariantIds(variantIds);
+        Map<String, List<ProductImage>> imageMap = new HashMap<>();
+        Map<String, List<Variant>> variantMap = new HashMap<>();
+        for (ProductImage image : images) {
+            String variantId = image.getVariant().getId();
+            if(imageMap.containsKey(variantId)) {
+                imageMap.get(variantId).add(image);
+            } else {
+                List<ProductImage> imageList = new ArrayList<>();
+                imageList.add(image);
+                imageMap.put(variantId, imageList);
+            }
+        }
+        for (Variant variant : variants) {
+            String variantId = variant.getId();
+            List<ProductImage> imageList = imageMap.get(variantId);
+            if(imageList != null && !imageList.isEmpty()) {
+                variant.setImages(imageMap.get(variantId));
+            }
+            String productId = variant.getProduct().getId();
+            if(variantMap.containsKey(productId)) {
+                variantMap.get(productId).add(variant);
+            } else {
+                List<Variant> variantList = new ArrayList<>();
+                variantList.add(variant);
+                variantMap.put(productId, variantList);
+            }
+        }
+        for (Product product : products) {
+            if(variantMap.containsKey(product.getId())) {
+                product.setVariants(variantMap.get(product.getId()));
+            }
+        }
+
         return products;
     }
 
@@ -59,11 +90,13 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
     }
 
     @Override
+    @Transactional
     public Product create(Product entity) {
         return repo.save(entity);
     }
 
     @Override
+    @Transactional
     public Product create(ProductCreateUpdateRequestDTO request) {
         Product product = mapper.toEntity(request);
         Product createdProduct = create(product);

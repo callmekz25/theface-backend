@@ -1,10 +1,7 @@
 package com.codewithkz.productservice.model;
 
 import com.codewithkz.commonlibrary.model.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -14,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ProductImages extends BaseEntity {
+public class ProductImage extends BaseEntity {
     @Column(name = "url")
     private String url;
     @Column(name = "public_id")
@@ -22,7 +19,7 @@ public class ProductImages extends BaseEntity {
     private int priority;
     @Column(name = "is_thumbnail")
     private boolean isThumbnail;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Variant variant;
 
 }

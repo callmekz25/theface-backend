@@ -1,18 +1,14 @@
 package com.codewithkz.productservice.service.impl;
 
-import com.codewithkz.commonlibrary.repository.BaseRepository;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.variant.VariantCreateUpdateRequestDTO;
-import com.codewithkz.productservice.dto.variant.VariantDTO;
+import com.codewithkz.productservice.mapper.ProductImageMapper;
 import com.codewithkz.productservice.mapper.VariantMapper;
-import com.codewithkz.productservice.model.Attribute;
-import com.codewithkz.productservice.model.AttributeValue;
-import com.codewithkz.productservice.model.Product;
-import com.codewithkz.productservice.model.Variant;
+import com.codewithkz.productservice.model.*;
 import com.codewithkz.productservice.repository.VariantRepository;
 import com.codewithkz.productservice.service.AttributeService;
+import com.codewithkz.productservice.service.ProductImageService;
 import com.codewithkz.productservice.service.VariantService;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +22,15 @@ public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUp
     private final VariantRepository repository;
     private final VariantMapper mapper;
     private final AttributeService attributeService;
-    public VariantServiceImpl(VariantRepository repository, VariantMapper mapper, AttributeService attributeService) {
+    private final ProductImageService productImageService;
+    private final ProductImageMapper productImageMapper;
+    public VariantServiceImpl(VariantRepository repository, VariantMapper mapper, AttributeService attributeService, ProductImageService productImageService, ProductImageMapper productImageMapper) {
         super(repository);
         this.repository = repository;
         this.mapper = mapper;
         this.attributeService = attributeService;
+        this.productImageService = productImageService;
+        this.productImageMapper = productImageMapper;
     }
 
     @Override
@@ -41,11 +41,11 @@ public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUp
 
     @Override
     @Transactional
-    public List<Variant> createList(Product product, List<VariantDTO> variants) {
+    public List<Variant> createList(Product product, List<VariantCreateUpdateRequestDTO> variants) {
         List<Variant> variantList = new ArrayList<>();
         Map<String, Attribute> attributeMap = new HashMap<>();
         Map<String, AttributeValue> attributeValueMap = new HashMap<>();
-        for (VariantDTO variantDTO : variants) {
+        for (VariantCreateUpdateRequestDTO variantDTO : variants) {
             VariantCreateUpdateRequestDTO dto = VariantCreateUpdateRequestDTO
                     .builder()
                     .sku(variantDTO.getSku())
@@ -54,6 +54,11 @@ public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUp
                     .build();
             Variant variant = mapper.toEntity(dto);
             variant.setProduct(product);
+            if(variantDTO.getImages() != null && !variantDTO.getImages().isEmpty()) {
+                List<ProductImage> images = productImageMapper.toEntityList(variantDTO.getImages());
+                productImageService.createList(variant, images);
+            }
+
             if (variantDTO.getAttributes() != null && !variantDTO.getAttributes().isEmpty()) {
 
                 List<AttributeValue> attributeValues = attributeService.createAttributeValueList(
@@ -69,5 +74,10 @@ public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUp
         }
 
         return createList(variantList);
+    }
+
+    @Override
+    public List<Variant> getByProductIds(List<String> productIds) {
+        return repository.findByProductIds(productIds);
     }
 }

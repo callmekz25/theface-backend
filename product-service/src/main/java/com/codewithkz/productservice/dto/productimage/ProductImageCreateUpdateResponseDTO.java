@@ -1,4 +1,4 @@
-package com.codewithkz.productservice.dto.attribute;
+package com.codewithkz.productservice.dto.productimage;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
 import lombok.AllArgsConstructor;
@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class AttributeDTO extends BaseDTO {
-    private String name;
-    private String value;
+public class ProductImageCreateUpdateResponseDTO extends BaseDTO {
+    private String url;
+    private String publicId;
+    private int priority;
+    private boolean isThumbnail;
 }

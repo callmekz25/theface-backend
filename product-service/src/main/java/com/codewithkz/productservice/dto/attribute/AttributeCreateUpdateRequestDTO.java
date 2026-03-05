@@ -11,4 +11,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AttributeCreateUpdateRequestDTO extends BaseDTO {
     private String name;
+    private String value;
 }

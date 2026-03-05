@@ -6,6 +6,6 @@ import com.codewithkz.productservice.dto.product.ProductCreateUpdateResponseDTO;
 import com.codewithkz.productservice.model.Product;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {VariantMapper.class})
 public interface ProductMapper extends BaseMapper<Product, ProductCreateUpdateRequestDTO, ProductCreateUpdateResponseDTO> {
 }

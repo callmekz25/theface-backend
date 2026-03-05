@@ -10,6 +10,4 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends BaseRepository<Product, String> {
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.variants")
-    List<Product> findAllVariants();
 }

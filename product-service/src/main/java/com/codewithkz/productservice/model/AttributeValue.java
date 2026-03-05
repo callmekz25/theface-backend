@@ -19,4 +19,6 @@ public class AttributeValue extends BaseEntity {
     private String value;
     @ManyToOne(fetch = FetchType.LAZY)
     private Attribute attribute;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "attributeValues")
+    private List<Variant> variants = new ArrayList<>();
 }

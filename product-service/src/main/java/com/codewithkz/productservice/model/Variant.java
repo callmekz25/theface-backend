@@ -20,8 +20,8 @@ public class Variant extends BaseEntity {
     private Long price;
     @Column(name = "is_active")
     private boolean isActive;
-    @OneToMany(mappedBy = "variant")
-    private List<ProductImages> images;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "variant")
+    private List<ProductImage> images;
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
     @ManyToMany(fetch = FetchType.LAZY)

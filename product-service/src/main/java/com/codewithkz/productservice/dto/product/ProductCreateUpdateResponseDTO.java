@@ -1,7 +1,8 @@
 package com.codewithkz.productservice.dto.product;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
-import com.codewithkz.productservice.dto.variant.VariantDTO;
+import com.codewithkz.productservice.dto.attribute.AttributeCreateUpdateResponseDTO;
+import com.codewithkz.productservice.dto.variant.VariantCreateUpdateResponseDTO;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -17,5 +18,5 @@ public class ProductCreateUpdateResponseDTO extends BaseDTO {
     private String slug;
     private String description;
     private String origin;
-    private List<VariantDTO> variants;
+    private List<VariantCreateUpdateResponseDTO> variants;
 }

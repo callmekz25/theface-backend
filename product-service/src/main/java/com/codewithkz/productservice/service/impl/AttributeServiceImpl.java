@@ -2,7 +2,6 @@ package com.codewithkz.productservice.service.impl;
 
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.attribute.AttributeCreateUpdateRequestDTO;
-import com.codewithkz.productservice.dto.attribute.AttributeDTO;
 import com.codewithkz.productservice.dto.attributevalue.AttributeValueCreateUpdateRequestDTO;
 import com.codewithkz.productservice.mapper.AttributeMapper;
 import com.codewithkz.productservice.mapper.AttributeValueMapper;
@@ -40,9 +39,9 @@ public class AttributeServiceImpl extends BaseServiceImpl<Attribute, AttributeCr
 
     @Override
     @Transactional
-    public List<AttributeValue> createAttributeValueList(Product product, List<AttributeDTO> attributes, Map<String, Attribute> attributeMap, Map<String, AttributeValue> attributeValueMap) {
+    public List<AttributeValue> createAttributeValueList(Product product, List<AttributeCreateUpdateRequestDTO> attributes, Map<String, Attribute> attributeMap, Map<String, AttributeValue> attributeValueMap) {
         List<AttributeValue> attributeValues = new ArrayList<>();
-        for (AttributeDTO attributeDTO : attributes) {
+        for (AttributeCreateUpdateRequestDTO attributeDTO : attributes) {
             // Attribute
             Attribute attribute = attributeMap.get(attributeDTO.getName());
             if(attribute == null) {
