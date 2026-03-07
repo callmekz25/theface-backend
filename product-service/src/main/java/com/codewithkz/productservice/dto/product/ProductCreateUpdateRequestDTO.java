@@ -18,4 +18,5 @@ public class ProductCreateUpdateRequestDTO extends BaseDTO {
     private String description;
     private String origin;
     private List<VariantCreateUpdateRequestDTO> variants;
+    private List<String> collectionIds;
 }

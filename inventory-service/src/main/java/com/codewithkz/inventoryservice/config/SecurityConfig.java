@@ -28,13 +28,13 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(
                         auth -> auth
-                                .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth ->
-                        oauth.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
-                        )
+                                .anyRequest().permitAll()
                 );
+//                .oauth2ResourceServer(oauth ->
+//                        oauth.jwt(jwt ->
+//                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
+//                        )
+//                );
 
         return http.build();
     }

@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         }
 )
 @EnableDiscoveryClient
-@EnableScheduling
 @EnableJpaAuditing
 public class InventoryServiceApplication {
 

@@ -4,6 +4,7 @@ import com.codewithkz.commonlibrary.exception.NotFoundException;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.product.ProductCreateUpdateRequestDTO;
 import com.codewithkz.productservice.mapper.ProductMapper;
+import com.codewithkz.productservice.model.Collection;
 import com.codewithkz.productservice.model.Product;
 import com.codewithkz.productservice.model.ProductImage;
 import com.codewithkz.productservice.model.Variant;
@@ -12,10 +13,7 @@ import com.codewithkz.productservice.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -23,14 +21,16 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
     private final ProductRepository repo;
     private final VariantService variantService;
     private final ProductImageService productImageService;
+    private final CollectionService collectionService;
     private final ProductMapper mapper;
 
-    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, VariantService variantService, ProductImageService productImageService) {
+    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, VariantService variantService, ProductImageService productImageService, CollectionService collectionService) {
         super(repo);
         this.repo = repo;
         this.mapper = mapper;
         this.variantService = variantService;
         this.productImageService = productImageService;
+        this.collectionService = collectionService;
     }
 
     @Override
@@ -84,8 +84,34 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
 
     @Override
     public Product getById(String id) {
-        var product = repo.findById(id)
+        Product product = repo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found with id: " + id));
+        String productId = product.getId();
+        List<String> variantIds = new ArrayList<>();
+        Map<String, List<ProductImage>> imageMap = new HashMap<>();
+        List<Variant> variants = variantService.getByProductIds(List.of(productId));
+        for (Variant variant : variants) {
+            variantIds.add(variant.getId());
+        }
+        List<ProductImage> images = productImageService.getByVariantIds(variantIds);
+        for (ProductImage image : images) {
+            String variantId = image.getVariant().getId();
+            if(imageMap.containsKey(variantId)) {
+                imageMap.get(variantId).add(image);
+            } else {
+                List<ProductImage> imageList = new ArrayList<>();
+                imageList.add(image);
+                imageMap.put(variantId, imageList);
+            }
+        }
+        for (Variant variant : variants) {
+            String variantId = variant.getId();
+            List<ProductImage> imageList = imageMap.get(variantId);
+            if(imageList != null && !imageList.isEmpty()) {
+                variant.setImages(imageMap.get(variantId));
+            }
+        }
+        product.setVariants(variants);
         return product;
     }
 
@@ -99,6 +125,12 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
     @Transactional
     public Product create(ProductCreateUpdateRequestDTO request) {
         Product product = mapper.toEntity(request);
+        if(request.getCollectionIds() != null && !request.getCollectionIds().isEmpty()) {
+            List<Collection> collections = collectionService.getByIds(request.getCollectionIds());
+            if(collections != null && !collections.isEmpty()) {
+                product.getCollections().addAll(collections);
+            }
+        }
         Product createdProduct = create(product);
         if(request.getVariants() != null && !request.getVariants().isEmpty()) {
             variantService.createList(createdProduct, request.getVariants());

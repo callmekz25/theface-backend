@@ -28,7 +28,7 @@ public abstract class BaseController<E extends BaseEntity, Req extends BaseDTO, 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Res> getById(@PathVariable ID id) {
+    public ResponseEntity<Res> getById(@PathVariable("id") ID id) {
         E entity = service.getById(id);
         return ResponseEntity.ok(mapper.toDTO(entity));
     }
@@ -42,7 +42,7 @@ public abstract class BaseController<E extends BaseEntity, Req extends BaseDTO, 
     }
 
     @PutMapping
-    public ResponseEntity<Res> update(@PathVariable ID id,
+    public ResponseEntity<Res> update(@PathVariable("id") ID id,
                                       @RequestBody Req req) {
         E entity = mapper.toEntity(req);
         E updated = service.update(id, entity);
@@ -50,7 +50,7 @@ public abstract class BaseController<E extends BaseEntity, Req extends BaseDTO, 
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@PathVariable ID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") ID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

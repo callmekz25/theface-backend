@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VariantRepository extends BaseRepository<Variant, String> {
     @Query("SELECT v FROM Variant v JOIN FETCH v.attributeValues av LEFT JOIN FETCH av.attribute WHERE v.product.id IN :productIds")
     List<Variant> findByProductIds(List<String> productIds);
+    @Query("SELECT v FROM Variant v JOIN FETCH v.attributeValues av LEFT JOIN FETCH av.attribute WHERE v.product.id = :productId")
+    Optional<Variant> findByProductId(String productId);
 }

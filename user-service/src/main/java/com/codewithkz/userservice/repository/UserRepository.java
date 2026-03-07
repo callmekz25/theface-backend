@@ -1,6 +1,6 @@
 package com.codewithkz.userservice.repository;
 
-import com.codewithkz.userservice.entity.User;
+import com.codewithkz.userservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

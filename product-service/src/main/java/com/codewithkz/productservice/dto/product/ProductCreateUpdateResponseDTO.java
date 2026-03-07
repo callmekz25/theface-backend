@@ -19,4 +19,5 @@ public class ProductCreateUpdateResponseDTO extends BaseDTO {
     private String description;
     private String origin;
     private List<VariantCreateUpdateResponseDTO> variants;
+    private List<String> collectionIds;
 }
