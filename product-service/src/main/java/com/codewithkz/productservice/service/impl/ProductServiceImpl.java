@@ -1,6 +1,7 @@
 package com.codewithkz.productservice.service.impl;
 
 import com.codewithkz.commonlibrary.exception.NotFoundException;
+import com.codewithkz.commonlibrary.model.InventoryStatus;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.product.ProductCreateUpdateRequestDTO;
 import com.codewithkz.productservice.mapper.ProductMapper;
@@ -10,6 +11,8 @@ import com.codewithkz.productservice.model.ProductImage;
 import com.codewithkz.productservice.model.Variant;
 import com.codewithkz.productservice.repository.ProductRepository;
 import com.codewithkz.productservice.service.*;
+import com.codewithkz.productservice.wrapper.dto.inventory.InventoryCreateUpdateRequestDTO;
+import com.codewithkz.productservice.wrapper.integration.InventoryIntegrationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,24 +21,26 @@ import java.util.*;
 
 @Service
 public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUpdateRequestDTO, String> implements ProductService {
-    private final ProductRepository repo;
     private final VariantService variantService;
+    private final ProductRepository repository;
     private final ProductImageService productImageService;
     private final CollectionService collectionService;
+    private final InventoryIntegrationService inventoryIntegrationService;
     private final ProductMapper mapper;
 
-    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, VariantService variantService, ProductImageService productImageService, CollectionService collectionService) {
-        super(repo);
-        this.repo = repo;
+    public ProductServiceImpl(ProductRepository repository, ProductMapper mapper, VariantService variantService, ProductImageService productImageService, CollectionService collectionService, InventoryIntegrationService inventoryIntegrationService) {
+        super(repository);
+        this.repository = repository;
         this.mapper = mapper;
         this.variantService = variantService;
         this.productImageService = productImageService;
         this.collectionService = collectionService;
+        this.inventoryIntegrationService = inventoryIntegrationService;
     }
 
     @Override
     public List<Product> getAll() {
-        var products = repo.findAll();
+        var products = repository.findAll();
         List<String> productIds = new ArrayList<>();
         List<String> variantIds = new ArrayList<>();
         for (Product product : products) {
@@ -84,7 +89,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
 
     @Override
     public Product getById(String id) {
-        Product product = repo.findById(id)
+        Product product = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found with id: " + id));
         String productId = product.getId();
         List<String> variantIds = new ArrayList<>();
@@ -118,7 +123,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
     @Override
     @Transactional
     public Product create(Product entity) {
-        return repo.save(entity);
+        return repository.save(entity);
     }
 
     @Override
@@ -133,7 +138,23 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
         }
         Product createdProduct = create(product);
         if(request.getVariants() != null && !request.getVariants().isEmpty()) {
-            variantService.createList(createdProduct, request.getVariants());
+            List<Variant> variants = variantService.createList(createdProduct, request.getVariants());
+            if(variants != null && !variants.isEmpty()) {
+                List<InventoryCreateUpdateRequestDTO> inventoryRequests = new ArrayList<>();
+                for (int i = 0; i < variants.size(); i++) {
+                    Variant variant = variants.get(i);
+                    int quantity = request.getVariants().get(i).getQuantity();
+                    InventoryCreateUpdateRequestDTO inventoryRequest = InventoryCreateUpdateRequestDTO
+                            .builder()
+                            .variantId(variant.getId())
+                            .quantity(quantity)
+                            .status(InventoryStatus.IN_STOCK)
+                            .build();
+                    inventoryRequests.add(inventoryRequest);
+                }
+                inventoryIntegrationService.createList(inventoryRequests);
+            }
+
         }
         return createdProduct;
     }
@@ -145,7 +166,7 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
 
     @Override
     public List<Product> createList(List<Product> entities) {
-        return repo.saveAll(entities);
+        return repository.saveAll(entities);
     }
 
     @Override

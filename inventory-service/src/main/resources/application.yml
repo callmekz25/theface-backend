@@ -1,9 +1,6 @@
 server:
   port: 8083
 
-jwt:
-  internalSecret: 9GSHO1glgDuEOAQrMps44LitSeaVNmMI40bl7Sxra30zZ2nXylPrzsbfgTVftLXE
-
 app:
   kafka:
     topic:
@@ -15,6 +12,8 @@ app:
 
 
 spring:
+  application:
+    name: inventory-service
   security:
     oauth2:
       resourceserver:

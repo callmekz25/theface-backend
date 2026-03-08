@@ -25,17 +25,18 @@ services:
 #    volumes:
 #      - order_data:/var/lib/postgresql/data
 #
-#  postgres-inventory:
-#    image: postgres:16
-#    container_name: postgres-inventory
-#    environment:
-#      POSTGRES_DB: inventory_db
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres
-#    ports:
-#      - "5435:5432"
-#    volumes:
-#      - inventory_data:/var/lib/postgresql/data
+  inventory-db:
+    image: postgres:16
+    container_name: inventory-db
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - inventory_data:/var/lib/postgresql/data
 #
 #  postgres-payment:
 #    image: postgres:16

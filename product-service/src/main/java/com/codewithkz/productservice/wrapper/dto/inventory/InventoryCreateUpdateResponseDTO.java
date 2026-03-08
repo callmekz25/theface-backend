@@ -1,8 +1,11 @@
-package com.codewithkz.inventoryservice.dto;
+package com.codewithkz.productservice.wrapper.dto.inventory;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
 import com.codewithkz.commonlibrary.model.InventoryStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter

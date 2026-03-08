@@ -41,6 +41,6 @@ spring:
 
 #
 #eureka:
-#  client:
+#  integration:
 #    service-url:
 #      defaultZone: http://localhost:8761/eureka

@@ -1,8 +1,11 @@
-package com.codewithkz.inventoryservice.dto;
+package com.codewithkz.productservice.wrapper.dto.inventory;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
 import com.codewithkz.commonlibrary.model.InventoryStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -10,11 +13,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class InventoryCreateUpdateResponseDTO extends BaseDTO {
+public class InventoryCreateUpdateRequestDTO extends BaseDTO {
     private String variantId;
     private int quantity;
     private int reservedQuantity;
     private int soldQuantity;
     private InventoryStatus status;
 }
-

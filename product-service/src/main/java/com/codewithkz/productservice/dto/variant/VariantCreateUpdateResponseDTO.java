@@ -20,7 +20,8 @@ import java.util.List;
 @SuperBuilder
 public class VariantCreateUpdateResponseDTO extends BaseDTO {
     private String sku;
-    private Long price;
+    private long price;
+    private int quantity;
     private boolean isActive;
     private List<ProductImageCreateUpdateResponseDTO> images;
     private List<AttributeCreateUpdateResponseDTO> attributes;
