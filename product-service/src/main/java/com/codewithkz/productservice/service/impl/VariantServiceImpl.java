@@ -2,6 +2,7 @@ package com.codewithkz.productservice.service.impl;
 
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.variant.VariantCreateUpdateRequestDTO;
+import com.codewithkz.productservice.dto.variant.VariantSearchRequestDTO;
 import com.codewithkz.productservice.mapper.ProductImageMapper;
 import com.codewithkz.productservice.mapper.VariantMapper;
 import com.codewithkz.productservice.model.*;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUpdateRequestDTO, String> implements VariantService {
+public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantSearchRequestDTO, String> implements VariantService {
     private final VariantRepository repository;
     private final VariantMapper mapper;
     private final AttributeService attributeService;
@@ -31,6 +32,14 @@ public class VariantServiceImpl extends BaseServiceImpl<Variant, VariantCreateUp
         this.attributeService = attributeService;
         this.productImageService = productImageService;
         this.productImageMapper = productImageMapper;
+    }
+
+    @Override
+    public List<Variant> getAll(VariantSearchRequestDTO searchRequestDTO) {
+        if(searchRequestDTO.getIds() != null && !searchRequestDTO.getIds().isEmpty()) {
+            return repository.findByIds(searchRequestDTO.getIds());
+        }
+        return repository.findAll();
     }
 
     @Override

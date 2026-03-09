@@ -2,12 +2,13 @@ package com.codewithkz.productservice.service;
 
 import com.codewithkz.commonlibrary.service.BaseService;
 import com.codewithkz.productservice.dto.variant.VariantCreateUpdateRequestDTO;
+import com.codewithkz.productservice.dto.variant.VariantSearchRequestDTO;
 import com.codewithkz.productservice.model.Product;
 import com.codewithkz.productservice.model.Variant;
 
 import java.util.List;
 
-public interface VariantService extends BaseService<Variant, VariantCreateUpdateRequestDTO, String> {
+public interface VariantService extends BaseService<Variant, VariantSearchRequestDTO, String> {
     List<Variant> createList(Product product, List<VariantCreateUpdateRequestDTO> variants);
     List<Variant> getByProductIds(List<String> productIds);
 }

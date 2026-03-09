@@ -1,9 +1,12 @@
-package com.codewithkz.orderservice.dto;
+package com.codewithkz.orderservice.dto.order;
 
 import com.codewithkz.commonlibrary.dto.BaseDTO;
-import com.codewithkz.orderservice.model.OrderStatus;
+import com.codewithkz.commonlibrary.model.OrderStatus;
+import com.codewithkz.orderservice.dto.orderitem.OrderItemCreateUpdateRequestDTO;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,9 +14,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class OrderCreateUpdateRequestDTO extends BaseDTO {
-    private String productId;
-    private int quantity;
-    private Double price;
-    private Double total;
+    private List<OrderItemCreateUpdateRequestDTO> orderItems;
     private OrderStatus status;
 }

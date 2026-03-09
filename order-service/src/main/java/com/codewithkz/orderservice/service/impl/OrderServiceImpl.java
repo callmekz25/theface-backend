@@ -1,104 +1,97 @@
 package com.codewithkz.orderservice.service.impl;
 
-import com.codewithkz.commonlibrary.exception.UnauthorizedException;
+import com.codewithkz.commonlibrary.exception.NotFoundException;
+import com.codewithkz.commonlibrary.model.OrderStatus;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
-import com.codewithkz.orderservice.dto.ProductCreateUpdateResponseDTO;
+import com.codewithkz.orderservice.dto.order.OrderCreateUpdateRequestDTO;
+import com.codewithkz.orderservice.mapper.OrderItemMapper;
 import com.codewithkz.orderservice.model.Order;
-import com.codewithkz.orderservice.model.OrderStatus;
-import com.codewithkz.commonlibrary.event.CreatePaymentEvent;
-import com.codewithkz.commonlibrary.event.InventoryReservedEvent;
-import com.codewithkz.orderservice.service.client.ProductServiceIntegration;
-import com.codewithkz.commonlibrary.event.OrderCreatedEvent;
+import com.codewithkz.orderservice.model.OrderItem;
+import com.codewithkz.orderservice.service.OrderItemService;
+import com.codewithkz.orderservice.wrapper.dto.variant.VariantCreateUpdateResponseDTO;
+import com.codewithkz.orderservice.wrapper.dto.variant.VariantSearchRequestDTO;
+import com.codewithkz.orderservice.wrapper.integration.ProductServiceIntegration;
 import com.codewithkz.orderservice.repository.OrderRepository;
 import com.codewithkz.orderservice.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
-public class OrderServiceImpl extends BaseServiceImpl<Order, String> implements OrderService {
+public class OrderServiceImpl extends BaseServiceImpl<Order, String, String> implements OrderService {
 
     private final ProductServiceIntegration productServiceIntegration;
-    private final OrderRepository orderRepository;
-    private final OutboxServiceImpl outboxService;
-    @Value("${app.kafka.topic.reserve-inventory-command}")
-    private String reserveInventoryTopicName;
-    @Value("${app.kafka.topic.create-payment-command}")
-    private String createPaymentTopicName;
+    private final OrderRepository repository;
+    private final OrderItemService orderItemService;
+    private final OrderItemMapper orderItemMapper;
+//    @Value("${app.kafka.topic.reserve-inventory-command}")
+//    private String reserveInventoryTopicName;
+//    @Value("${app.kafka.topic.create-payment-command}")
+//    private String createPaymentTopicName;
 
-    public OrderServiceImpl(OrderRepository repository, ProductServiceIntegration productServiceIntegration, OutboxServiceImpl outboxService) {
+    public OrderServiceImpl(OrderRepository repository, ProductServiceIntegration productServiceIntegration, OrderItemService orderItemService, OrderItemMapper orderItemMapper) {
         super(repository);
-        this.orderRepository = repository;
-        this.outboxService = outboxService;
+        this.repository = repository;
         this.productServiceIntegration = productServiceIntegration;
+        this.orderItemService = orderItemService;
+        this.orderItemMapper = orderItemMapper;
+    }
+
+
+    @Override
+    @Transactional
+    public Order create(Order order) {
+        return repository.save(order);
     }
 
     @Override
     @Transactional
-    public Order create(Order dto) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException("Unauthenticated");
+    public Order create(OrderCreateUpdateRequestDTO request) {
+        int totalItems = 0;
+        long totalPrice = 0;
+        List<OrderItem> orderItems = orderItemMapper.toEntityList(request.getOrderItems());
+        List<String> variantIds = new ArrayList<>();
+        for (OrderItem item : orderItems) {
+            variantIds.add(item.getVariantId());
+            totalItems += item.getQuantity();
         }
-
-        String userId = authentication.getName();
-
-        var order = new Order();
-        log.info("Call to product-service to get product with id: {}", dto.getProductId());
-        ProductCreateUpdateResponseDTO product = productServiceIntegration.getById(dto.getProductId()).getData();
-
-        order.setProductId(product.getId());
-        order.setQuantity(dto.getQuantity());
-        order.setUserId(userId);
-        double total = (double) dto.getQuantity() * product.getPrice();
-        order.setPrice((double) product.getPrice());
-        order.setTotal(total);
-        order.setStatus(OrderStatus.PENDING);
-
-        Order created = orderRepository.save(order);
-
-        OrderCreatedEvent payload = OrderCreatedEvent
+        Map<String, VariantCreateUpdateResponseDTO> variantMap = new HashMap<>();
+        List<VariantCreateUpdateResponseDTO> variants = productServiceIntegration.getAllVariants(variantIds).getBody();
+        for (VariantCreateUpdateResponseDTO variant : variants) {
+            variantMap.put(variant.getId(), variant);
+        }
+        for (OrderItem item : orderItems) {
+            VariantCreateUpdateResponseDTO variant = variantMap.get(item.getVariantId());
+            if (variant == null) {
+                throw new NotFoundException("Variant not found: " + item.getVariantId());
+            }
+            item.setPrice(variant.getPrice());
+            String attribute = variant.getAttributes()
+                    .stream()
+                    .map(a -> a.getName() + ": " + a.getValue())
+                    .collect(Collectors.joining(" / "));
+            item.setAttribute(attribute);
+            totalPrice += item.getQuantity() * variant.getPrice();
+        }
+        Order order = Order
                 .builder()
-                .orderId(created.getId())
-                .productId(order.getProductId())
-                .quantity(created.getQuantity())
-                .userId(created.getUserId())
-                .price(created.getPrice())
-                .total(created.getTotal())
+                .totalPrice(totalPrice)
+                .userId("123")
+                .totalItems(totalItems)
+                .status(OrderStatus.PENDING)
                 .build();
-
-        outboxService.create(reserveInventoryTopicName, payload);
-        return created;
-
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setOrder(order);
+        }
+        List<OrderItem> createOrderItems = orderItemService.createList(orderItems);
+        order.setOrderItems(createOrderItems);
+        return create(order);
     }
-
-    @Override
-    @Transactional
-    public void updateStatusOrder(String orderId, OrderStatus status) {
-        Order order = getById(orderId);
-
-        order.setStatus(status);
-        super.update(orderId, order);
-    }
-
-    @Override
-    @Transactional
-    public void handleCreatePaymentCommand(InventoryReservedEvent event) {
-        Order order = getById(event.getOrderId());
-
-        CreatePaymentEvent payload = CreatePaymentEvent
-                .builder()
-                .orderId(order.getId())
-                .amount(order.getTotal())
-                .build();
-
-        outboxService.create(createPaymentTopicName, payload);
-    }
-
 }

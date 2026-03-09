@@ -18,16 +18,17 @@ public class GatewayConfig {
 //                        .path("/api/auth/**")
 //                        .uri("lb://auth-service"))
                 .route(p -> p
-                        .path("/v1/products/**", "/v1/collections/**", "/v1/brands/**")
+                        .path("/v1/products/**", "/v1/collections/**", "/v1/brands/**", "/v1/variants/**")
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://product-service"))
                 .route(p -> p
                         .path("/v1/inventories/**")
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://inventory-service"))
-//                .route(p -> p
-//                        .path("/api/orders/**")
-//                        .uri(orderService))
+                .route(p -> p
+                        .path("/v1/orders/**")
+                        .filters(f -> f.stripPrefix(1))
+                        .uri("lb://order-service"))
 //                .route(p -> p
 //                        .path("/api/payments/**")
 //                        .uri(paymentService))

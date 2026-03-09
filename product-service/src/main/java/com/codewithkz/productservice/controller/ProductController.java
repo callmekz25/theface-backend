@@ -28,13 +28,6 @@ public class ProductController extends BaseController<Product, ProductCreateUpda
     }
 
     @Override
-    @GetMapping
-    public ResponseEntity<List<ProductCreateUpdateResponseDTO>> getAll(@ModelAttribute ProductSearchRequestDTO requestDTO) {
-        List<Product> products = productService.getAll(requestDTO);
-        return ResponseEntity.ok(productMapper.toDTOList(products));
-    }
-
-    @Override
     @PostMapping
     public ResponseEntity<ProductCreateUpdateResponseDTO> create(@RequestBody ProductCreateUpdateRequestDTO requestDTO)
     {
