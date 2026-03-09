@@ -15,6 +15,8 @@ import java.util.List;
 public interface VariantMapper extends BaseMapper<Variant, VariantCreateUpdateRequestDTO, VariantCreateUpdateResponseDTO> {
     @Override
     @Mapping(target = "attributes", source = "attributeValues")
+    @Mapping(source = "default", target = "isDefault")
+    @Mapping(source = "active", target = "isActive")
     VariantCreateUpdateResponseDTO toDTO(Variant entity);
 
     @Mapping(target = "name", source = "attribute.name")

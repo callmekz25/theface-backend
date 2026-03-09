@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface BaseService<E extends BaseEntity, S, ID> {
-    List<E> getAll();
+    List<E> getAll(S request);
     E getById(ID id);
     E create(E entity);
     List<E> search(S request);

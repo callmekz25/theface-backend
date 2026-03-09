@@ -22,4 +22,9 @@ public class CollectionServiceImpl extends BaseServiceImpl<Collection, String, S
     public List<Collection> getByIds(List<String> ids) {
         return repository.findByIds(ids);
     }
+
+    @Override
+    public List<Collection> getBySlugs(List<String> slugs) {
+        return repository.findBySlugs(slugs);
+    }
 }

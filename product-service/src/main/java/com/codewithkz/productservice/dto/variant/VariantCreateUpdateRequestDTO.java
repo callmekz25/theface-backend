@@ -21,6 +21,7 @@ public class VariantCreateUpdateRequestDTO extends BaseDTO {
     private long price;
     private int quantity;
     private boolean isActive;
+    private boolean isDefault;
     private List<ProductImageCreateUpdateRequestDTO> images;
     private List<AttributeCreateUpdateRequestDTO> attributes;
 }

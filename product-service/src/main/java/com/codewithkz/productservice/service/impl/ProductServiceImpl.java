@@ -4,6 +4,7 @@ import com.codewithkz.commonlibrary.exception.NotFoundException;
 import com.codewithkz.commonlibrary.model.InventoryStatus;
 import com.codewithkz.commonlibrary.service.impl.BaseServiceImpl;
 import com.codewithkz.productservice.dto.product.ProductCreateUpdateRequestDTO;
+import com.codewithkz.productservice.dto.product.ProductSearchRequestDTO;
 import com.codewithkz.productservice.mapper.ProductMapper;
 import com.codewithkz.productservice.model.Collection;
 import com.codewithkz.productservice.model.Product;
@@ -20,7 +21,7 @@ import java.util.*;
 
 
 @Service
-public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUpdateRequestDTO, String> implements ProductService {
+public class ProductServiceImpl extends BaseServiceImpl<Product, ProductSearchRequestDTO, String> implements ProductService {
     private final VariantService variantService;
     private final ProductRepository repository;
     private final ProductImageService productImageService;
@@ -39,8 +40,94 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
     }
 
     @Override
-    public List<Product> getAll() {
-        var products = repository.findAll();
+    public List<Product> getAll(ProductSearchRequestDTO request) {
+        List<Product> products;
+        if(request.getCollections() != null && !request.getCollections().isEmpty()) {
+            List<Collection> collections = collectionService.getBySlugs(request.getCollections());
+            List<String> collectionIds = new ArrayList<>();
+            for (Collection collection : collections) {
+                collectionIds.add(collection.getId());
+            }
+            products = repository.findByCollectionIds(collectionIds);
+        } else {
+            products = repository.findAll();
+        }
+        return loadVariantsAndImages(products);
+    }
+
+
+    @Override
+    public Product getById(String id) {
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + id));
+        List<Product> products = loadVariantsAndImages(List.of(product));
+        return products.get(0);
+    }
+
+    @Override
+    @Transactional
+    public Product create(Product entity) {
+        return repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public Product create(ProductCreateUpdateRequestDTO request) {
+        Product product = mapper.toEntity(request);
+        if(request.getCollectionIds() != null && !request.getCollectionIds().isEmpty()) {
+            List<Collection> collections = collectionService.getByIds(request.getCollectionIds());
+            if(collections != null && !collections.isEmpty()) {
+                product.getCollections().addAll(collections);
+            }
+        }
+        Product createdProduct = create(product);
+        if(request.getVariants() != null && !request.getVariants().isEmpty()) {
+            List<Variant> variants = variantService.createList(createdProduct, request.getVariants());
+            if(variants != null && !variants.isEmpty()) {
+                List<InventoryCreateUpdateRequestDTO> inventoryRequests = new ArrayList<>();
+                for (int i = 0; i < variants.size(); i++) {
+                    Variant variant = variants.get(i);
+                    int quantity = request.getVariants().get(i).getQuantity();
+                    InventoryCreateUpdateRequestDTO inventoryRequest = InventoryCreateUpdateRequestDTO
+                            .builder()
+                            .variantId(variant.getId())
+                            .quantity(quantity)
+                            .status(InventoryStatus.IN_STOCK)
+                            .build();
+                    inventoryRequests.add(inventoryRequest);
+                }
+                inventoryIntegrationService.createList(inventoryRequests);
+            }
+
+        }
+        return createdProduct;
+    }
+
+
+
+    @Override
+    public Product getBySlug(String slug) {
+        Product product = repository.findBySlug(slug).orElseThrow(() -> new NotFoundException("Product not found with slug: " + slug));
+        List<Product> products = loadVariantsAndImages(List.of(product));
+        return products.get(0);
+    }
+
+    @Override
+    public List<Product> createList(List<Product> entities) {
+        return repository.saveAll(entities);
+    }
+
+    @Override
+    public Product update(String s, Product entity) {
+        return null;
+    }
+
+    @Override
+    public void delete(String s) {
+
+    }
+
+    private List<Product> loadVariantsAndImages(List<Product> products) {
         List<String> productIds = new ArrayList<>();
         List<String> variantIds = new ArrayList<>();
         for (Product product : products) {
@@ -83,99 +170,6 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductCreateUp
                 product.setVariants(variantMap.get(product.getId()));
             }
         }
-
         return products;
-    }
-
-    @Override
-    public Product getById(String id) {
-        Product product = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product not found with id: " + id));
-        String productId = product.getId();
-        List<String> variantIds = new ArrayList<>();
-        Map<String, List<ProductImage>> imageMap = new HashMap<>();
-        List<Variant> variants = variantService.getByProductIds(List.of(productId));
-        for (Variant variant : variants) {
-            variantIds.add(variant.getId());
-        }
-        List<ProductImage> images = productImageService.getByVariantIds(variantIds);
-        for (ProductImage image : images) {
-            String variantId = image.getVariant().getId();
-            if(imageMap.containsKey(variantId)) {
-                imageMap.get(variantId).add(image);
-            } else {
-                List<ProductImage> imageList = new ArrayList<>();
-                imageList.add(image);
-                imageMap.put(variantId, imageList);
-            }
-        }
-        for (Variant variant : variants) {
-            String variantId = variant.getId();
-            List<ProductImage> imageList = imageMap.get(variantId);
-            if(imageList != null && !imageList.isEmpty()) {
-                variant.setImages(imageMap.get(variantId));
-            }
-        }
-        product.setVariants(variants);
-        return product;
-    }
-
-    @Override
-    @Transactional
-    public Product create(Product entity) {
-        return repository.save(entity);
-    }
-
-    @Override
-    @Transactional
-    public Product create(ProductCreateUpdateRequestDTO request) {
-        Product product = mapper.toEntity(request);
-        if(request.getCollectionIds() != null && !request.getCollectionIds().isEmpty()) {
-            List<Collection> collections = collectionService.getByIds(request.getCollectionIds());
-            if(collections != null && !collections.isEmpty()) {
-                product.getCollections().addAll(collections);
-            }
-        }
-        Product createdProduct = create(product);
-        if(request.getVariants() != null && !request.getVariants().isEmpty()) {
-            List<Variant> variants = variantService.createList(createdProduct, request.getVariants());
-            if(variants != null && !variants.isEmpty()) {
-                List<InventoryCreateUpdateRequestDTO> inventoryRequests = new ArrayList<>();
-                for (int i = 0; i < variants.size(); i++) {
-                    Variant variant = variants.get(i);
-                    int quantity = request.getVariants().get(i).getQuantity();
-                    InventoryCreateUpdateRequestDTO inventoryRequest = InventoryCreateUpdateRequestDTO
-                            .builder()
-                            .variantId(variant.getId())
-                            .quantity(quantity)
-                            .status(InventoryStatus.IN_STOCK)
-                            .build();
-                    inventoryRequests.add(inventoryRequest);
-                }
-                inventoryIntegrationService.createList(inventoryRequests);
-            }
-
-        }
-        return createdProduct;
-    }
-
-    @Override
-    public List<Product> search(ProductCreateUpdateRequestDTO request) {
-        return List.of();
-    }
-
-    @Override
-    public List<Product> createList(List<Product> entities) {
-        return repository.saveAll(entities);
-    }
-
-    @Override
-    public Product update(String s, Product entity) {
-        return null;
-    }
-
-    @Override
-    public void delete(String s) {
-
     }
 }

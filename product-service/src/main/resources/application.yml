@@ -25,7 +25,7 @@ spring:
     properties:
       hibernate.jdbc.time_zone: UTC
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
 
 #  kafka:

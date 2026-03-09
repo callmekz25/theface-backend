@@ -17,7 +17,7 @@ public abstract class BaseServiceImpl<E extends BaseEntity, S, ID> implements Ba
     }
 
     @Override
-    public List<E> getAll() {
+    public List<E> getAll(S s) {
         return repository.findAll();
     }
 

@@ -11,4 +11,6 @@ import java.util.List;
 public interface CollectionRepository extends BaseRepository<Collection, String> {
     @Query("SELECT c FROM Collection c WHERE c.id IN :ids")
     List<Collection> findByIds(List<String> ids);
+    @Query("SELECT c FROM Collection c WHERE c.slug IN :slugs")
+    List<Collection> findBySlugs(List<String> slugs);
 }

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface CollectionService extends BaseService<Collection, String, String> {
     List<Collection> getByIds(List<String> ids);
+    List<Collection> getBySlugs(List<String> slugs);
 }

@@ -22,8 +22,8 @@ public abstract class BaseController<E extends BaseEntity, Req extends BaseDTO, 
 
 
     @GetMapping
-    public ResponseEntity<List<Res>> getAll() {
-        List<E> result = service.getAll();
+    public ResponseEntity<List<Res>> getAll(@ModelAttribute S search) {
+        List<E> result = service.getAll(search);
         return ResponseEntity.ok(mapper.toDTOList(result));
     }
 

@@ -23,6 +23,7 @@ public class VariantCreateUpdateResponseDTO extends BaseDTO {
     private long price;
     private int quantity;
     private boolean isActive;
+    private boolean isDefault;
     private List<ProductImageCreateUpdateResponseDTO> images;
     private List<AttributeCreateUpdateResponseDTO> attributes;
 }
